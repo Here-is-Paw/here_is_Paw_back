@@ -34,7 +34,7 @@ public class MemberService {
         return new MemberInfoDto(loginUser);
     }
 
-    public Member signup(String username, String password, String nickname) {
+    public Member signup(String username, String password, String nickname, String avatar) {
         memberRepository
                 .findByUsername(username)
                 .ifPresent(user -> {
@@ -45,6 +45,7 @@ public class MemberService {
                 .username(username)
                 .password(password)
                 .nickname(nickname)
+                .avatar(avatar)
                 .apiKey(UUID.randomUUID().toString())
                 .build();
 
@@ -104,18 +105,19 @@ public class MemberService {
         return member;
     }
 
-    public void modify(Member member, @NotBlank String nickname) {
+    public void modify(Member member, @NotBlank String nickname, String avatar) {
         member.setNickname(nickname);
+        member.setAvatar(avatar);
     }
 
-    public Member modifyOrJoin(String username, String nickname) {
+    public Member modifyOrJoin(String username, String nickname, String avatar) {
         Optional<Member> opMember = findByUsername(username);
         if (opMember.isPresent()) {
             Member member = opMember.get();
-            modify(member, nickname);
+            modify(member, nickname, avatar);
             return member;
         }
-        return signup(username, "", nickname);
+        return signup(username, "", nickname, avatar);
     }
 
     public LoginResponse login(LoginRequest loginRq) {
@@ -130,4 +132,7 @@ public class MemberService {
         return new LoginResponse(new MemberInfoDto(member), member.getApiKey(), token);
     }
 
+    public void update(Member member) {
+        memberRepository.save(member);
+    }
 }

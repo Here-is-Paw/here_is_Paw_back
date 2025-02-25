@@ -1,6 +1,7 @@
 package com.ll.hereispaw.domain.missing.missing.dto.request;
 
 import com.ll.hereispaw.domain.missing.Auhtor.entity.Author;
+import com.ll.hereispaw.domain.missing.missing.entity.Missing;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -38,4 +39,23 @@ public class MissingRequestDTO {
     private Author author;
 //    @NotBlank(message = "사진은 필수입력입니다.")
     private String pathUrl;
+
+    public MissingRequestDTO(Missing missing) {
+        author = missing.getAuthor();
+        pathUrl = missing.getPathUrl();
+
+        name = missing.getName();
+        breed = missing.getBreed();
+        geo = missing.getGeo();
+        location = missing.getLocation();
+        color = missing.getColor();
+        serialNumber = missing.getSerialNumber();
+        gender = missing.isGender();
+        neutered = missing.isNeutered();
+        age = missing.getAge();
+        lostDate = missing.getLostDate();
+        etc = missing.getEtc();
+        reward = missing.getReward();
+        state = missing.getState();
+    }
 }

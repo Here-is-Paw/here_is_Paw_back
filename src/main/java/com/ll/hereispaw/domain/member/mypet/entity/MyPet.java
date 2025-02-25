@@ -4,14 +4,18 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.ll.hereispaw.domain.member.member.entity.Member;
 import com.ll.hereispaw.global.jpa.BaseEntity;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 @Entity
-@Getter
 @Setter
-@Builder
-@NoArgsConstructor
+@Getter
 @AllArgsConstructor
+@NoArgsConstructor
+@SuperBuilder
 public class MyPet extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)

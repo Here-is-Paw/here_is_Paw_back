@@ -4,6 +4,7 @@ package com.ll.hereispaw.global.security;
 import com.ll.hereispaw.domain.member.member.entity.Member;
 import com.ll.hereispaw.domain.member.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Locale;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
@@ -33,7 +35,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String nickname = attributesProperties.get("nickname");
         String profileImgUrl = attributesProperties.get("profile_image");
         String username = providerTypeCode + "__" + oauthId;
-        Member member = memberService.modifyOrJoin(username, nickname);
+        Member member = memberService.modifyOrJoin(username, nickname, profileImgUrl);
 
         return new SecurityUser(
                 member.getId(),

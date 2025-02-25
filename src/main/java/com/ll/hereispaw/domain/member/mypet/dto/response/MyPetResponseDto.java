@@ -1,10 +1,11 @@
 package com.ll.hereispaw.domain.member.mypet.dto.response;
 
 import com.ll.hereispaw.domain.member.mypet.entity.MyPet;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Setter
+@Getter @Setter
 @NoArgsConstructor
 public class MyPetResponseDto {
     private String name;

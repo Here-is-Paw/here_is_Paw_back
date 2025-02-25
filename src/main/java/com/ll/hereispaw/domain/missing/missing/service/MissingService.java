@@ -10,26 +10,55 @@ import com.ll.hereispaw.domain.member.member.entity.Member;
 import com.ll.hereispaw.global.error.ErrorCode;
 import com.ll.hereispaw.global.error.ErrorResponse;
 import com.ll.hereispaw.global.exception.CustomException;
+import com.ll.hereispaw.global.globalDto.GlobalResponse;
+import com.ll.hereispaw.global.webMvc.LoginUser;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Tag(name = " 실종 신고 API", description = "Missing")
 public class MissingService {
+    @Value("${custom.bucket.name}")
+    private String bucketName;
+
+    @Value("${custom.bucket.region}")
+    private String region;
+
+    @Value("${custom.bucket.missing}")
+    private String dirName;
+
+    private final S3Client s3Client;
+
     private final MissingRepository missingRepository;
     private final AuthorRepository authorRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
 
-    public MissingDTO write(MissingRequestDTO missingRequestDto) {
+    public MissingDTO write(Author author, MissingRequestDTO missingRequestDto,
+                            MultipartFile file) {
 
         log.debug("author : {}", missingRequestDto.getAuthor());
 
@@ -49,9 +78,11 @@ public class MissingService {
                         .reward(missingRequestDto.getReward())
                         .state(missingRequestDto.getState())
                         .pathUrl(missingRequestDto.getPathUrl())
-                        .author(missingRequestDto.getAuthor())
+                        .author(author)
                         .build()
         );
+
+        s3Upload(missing, file);
 
         return new MissingDTO(missing);
     }
@@ -99,7 +130,7 @@ public class MissingService {
         return new MissingDTO(missing);
     }
 
-    public MissingDTO update(MissingRequestDTO missingRequestDTO, Long missingId) {
+    public MissingDTO update(Author author, MissingRequestDTO missingRequestDTO, Long missingId, MultipartFile file) {
 
         Missing missing = missingRepository.findById(missingId).orElseThrow(() -> new CustomException(ErrorCode.MISSING_NOT_FOUND));
 
@@ -107,35 +138,118 @@ public class MissingService {
         log.debug("missing.name : {}", missing.getName());
 
         // 수정 시 유저 확인
-        // - 코드 작성해야함.
+        long loginUserId = missingRequestDTO.getAuthor().getId();
 
-        missing.setName(missingRequestDTO.getName());
-        missing.setBreed(missingRequestDTO.getBreed());
-        missing.setGeo(missingRequestDTO.getGeo());
-        missing.setLocation(missingRequestDTO.getLocation());
-        missing.setColor(missingRequestDTO.getColor());
-        missing.setSerialNumber(missingRequestDTO.getSerialNumber());
-        missing.setGender(missingRequestDTO.isGender());
-        missing.setNeutered(missingRequestDTO.isNeutered());
-        missing.setAge(missingRequestDTO.getAge());
-        missing.setLostDate(missingRequestDTO.getLostDate());
-        missing.setEtc(missingRequestDTO.getEtc());
-        missing.setState(missingRequestDTO.getState());
-        missing.setReward(missingRequestDTO.getReward());
-        missing.setPathUrl(missingRequestDTO.getPathUrl());
+        if(author.getId() == loginUserId) {
+            missing.setName(missingRequestDTO.getName());
+            missing.setBreed(missingRequestDTO.getBreed());
+            missing.setGeo(missingRequestDTO.getGeo());
+            missing.setLocation(missingRequestDTO.getLocation());
+            missing.setColor(missingRequestDTO.getColor());
+            missing.setSerialNumber(missingRequestDTO.getSerialNumber());
+            missing.setGender(missingRequestDTO.isGender());
+            missing.setNeutered(missingRequestDTO.isNeutered());
+            missing.setAge(missingRequestDTO.getAge());
+            missing.setLostDate(missingRequestDTO.getLostDate());
+            missing.setEtc(missingRequestDTO.getEtc());
+            missing.setState(missingRequestDTO.getState());
+            missing.setReward(missingRequestDTO.getReward());
+            missing.setPathUrl(missingRequestDTO.getPathUrl());
 
-        missingRepository.save(missing);
+            s3Update(missing, file);
+
+            missingRepository.save(missing);
+        }
 
         return new MissingDTO(missing);
-
     }
 
-    public String delete(Long missingId) {
+    public String delete(Author author, Long missingId) {
         Missing missing = missingRepository.findById(missingId).orElseThrow(() -> new CustomException(ErrorCode.MISSING_NOT_FOUND));
 
-        missingRepository.delete(missing);
+        Long loginUserId = missing.getAuthor().getId();
 
-        return "신고글 삭제";
+        if (Objects.equals(author.getId(), loginUserId)) {
+            s3Delete(missing);
+            missingRepository.delete(missing);
+
+            return "신고글 삭제";
+        }
+
+        return "삭제 권한이 없습니다.";
+    }
+
+    // s3 매서드
+    public GlobalResponse<String> s3Upload(
+            Missing missing,
+            MultipartFile file) {
+        try {
+            String filename = getUuidFilename(file);
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(dirName + "/" + filename)
+                    .contentType(file.getContentType())
+                    .build();
+
+            s3Client.putObject(putObjectRequest,
+                    RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+
+            missing.setPathUrl(getS3FileUrl(filename));
+
+        } catch (IOException e) {
+            return GlobalResponse.error(ErrorCode.S3_UPLOAD_ERROR);
+        }
+
+        return GlobalResponse.success("업로드 성공");
+    }
+
+    public GlobalResponse<String> s3Delete(Missing missing) {
+        try {
+            String fileName = getFileNameFromS3Url(missing.getPathUrl());
+            DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(dirName + "/" + fileName)
+                    .build();
+            s3Client.deleteObject(deleteObjectRequest);
+            missing.setPathUrl(getS3FileUrl("defaultAvatar.jpg"));
+        } catch (Exception e) {
+            log.warn("Failed to delete old profile image", e);
+        }
+        return GlobalResponse.success("삭제 성공");
+    }
+
+    public GlobalResponse<String> s3Update(
+            Missing missing,
+            MultipartFile file) {
+
+        if (missing.getPathUrl() != null) {
+            s3Delete(missing);
+            s3Upload(missing, file);
+        }
+
+        return GlobalResponse.success("수정 성공");
+    }
+
+    private String getUuidFilename(MultipartFile file) {
+        // ContentType으로부터 확장자 추출
+        String contentType = file.getContentType();
+        String extension = switch (contentType) {
+            case "image/jpeg" -> "jpg";
+            case "image/png" -> "png";
+            case "image/gif" -> "gif";
+            default -> "jpg";  // 기본값 설정
+        };
+
+        // UUID 파일명 생성
+        return UUID.randomUUID().toString() + "." + extension;
+    }
+
+    public String getS3FileUrl(String fileName) {
+        return "https://" + bucketName + ".s3." + region + ".amazonaws.com/" + dirName + "/" + fileName;
+    }
+
+    public String getFileNameFromS3Url(String s3Url) {
+        return s3Url.substring(s3Url.lastIndexOf('/') + 1);
     }
 }
 

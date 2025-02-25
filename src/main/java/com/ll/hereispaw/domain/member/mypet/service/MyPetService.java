@@ -5,9 +5,9 @@ import com.ll.hereispaw.domain.member.mypet.dto.request.MyPetRequest;
 import com.ll.hereispaw.domain.member.mypet.dto.response.MyPetResponseDto;
 import com.ll.hereispaw.domain.member.mypet.entity.MyPet;
 import com.ll.hereispaw.domain.member.mypet.repository.MyPetRepository;
-import jakarta.persistence.EntityNotFoundException;
+import com.ll.hereispaw.global.error.ErrorCode;
+import com.ll.hereispaw.global.exception.CustomException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -46,23 +46,25 @@ public class MyPetService {
         myPetRepository.save(myPet);
     }
 
-    public MyPet findByMyPet(Member loginUser, Long id) {
+    // 내 반려견 단건 조회
+    public MyPetResponseDto findByMyPet(Member loginUser, Long id) {
         MyPet myPet = myPetRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("등록된 펫을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.MY_PET_NOT_FOUND));
 
         if (!Objects.equals(myPet.getMember().getId(), loginUser.getId())) {
-            throw new AccessDeniedException("권한이 없습니다.");
+            throw new CustomException(ErrorCode.SC_FORBIDDEN);
         }
 
-        return myPet;
+        return MyPetResponseDto.of(myPet);
     }
 
+    // 내 반려견 수정
     public void modifyMyPet(Member loginUser, Long id, MyPetRequest myPetRequest) {
         MyPet myPet = myPetRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("등록된 펫을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.MY_PET_NOT_FOUND));
 
         if (!Objects.equals(myPet.getMember().getId(), loginUser.getId())) {
-            throw new AccessDeniedException("권한이 없습니다");
+            throw new CustomException(ErrorCode.SC_FORBIDDEN);
         }
 
         myPet.setName(myPetRequest.getName());
@@ -93,12 +95,13 @@ public class MyPetService {
         myPetRepository.save(myPet);
     }
 
+    // 내 반려견 삭제
     public void deleteMyPet(Member loginUser, Long id) {
         MyPet myPet = myPetRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("등록된 펫을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.MY_PET_NOT_FOUND));
 
         if (!Objects.equals(myPet.getMember().getId(), loginUser.getId())) {
-            throw new AccessDeniedException("권한이 없습니다");
+            throw new CustomException(ErrorCode.SC_FORBIDDEN);
         }
 
         myPetRepository.delete(myPet);

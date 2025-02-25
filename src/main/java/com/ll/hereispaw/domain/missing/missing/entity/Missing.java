@@ -1,26 +1,25 @@
 package com.ll.hereispaw.domain.missing.missing.entity;
 
 import com.ll.hereispaw.domain.missing.Auhtor.entity.Author;
-import com.ll.hereispaw.global.jpa.entity.BaseEntity;
+import com.ll.hereispaw.global.jpa.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
-import org.hibernate.annotations.Type;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 import java.sql.Timestamp;
 
-import static lombok.AccessLevel.PROTECTED;
-
 @Entity
-@NoArgsConstructor(access = PROTECTED)
-@AllArgsConstructor(access = PROTECTED)
-@Builder
-@Getter
 @Setter
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
+@SuperBuilder
 public class Missing extends BaseEntity {
     /**
      * 이름, 견종, 유기견 이미지, 지역, 좌표

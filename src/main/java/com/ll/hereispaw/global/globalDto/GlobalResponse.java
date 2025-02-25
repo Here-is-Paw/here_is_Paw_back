@@ -1,8 +1,9 @@
 package com.ll.hereispaw.global.globalDto;
 
 import com.ll.hereispaw.global.error.ErrorCode;
-import java.time.LocalDateTime;
 import lombok.Getter;
+
+import java.time.LocalDateTime;
 
 
 @Getter
@@ -37,6 +38,16 @@ public class GlobalResponse<T> {
     // 성공 응답 (데이터 없음)
     public static <T> GlobalResponse<T> success() {
         return success(null);
+    }
+
+    // 생성 성공 응답 (데이터 포함)
+    public static <T> GlobalResponse<T> createSuccess(T data) {
+        return new GlobalResponse<>(GlobalResponseCode.CREATE, data);
+    }
+
+    // 생성 성공 응답 (데이터 없음)
+    public static <T> GlobalResponse<T> createSuccess() {
+        return createSuccess(null);
     }
 
     // 에러 응답 (데이터 포함)
