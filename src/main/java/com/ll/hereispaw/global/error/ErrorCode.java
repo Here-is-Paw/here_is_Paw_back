@@ -46,7 +46,12 @@ public enum ErrorCode {
     S3_UPLOAD_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "S3 업로드 중 오류가 발생했습니다."),
   
     // missing
-    MISSING_NOT_FOUND(HttpStatus.NOT_FOUND, "신고글을 찾을 수 없습니다.");
+    MISSING_NOT_FOUND(HttpStatus.NOT_FOUND, "신고글을 찾을 수 없습니다."),
+
+    // payment
+    PAYMENT_FAILED(HttpStatus.BAD_REQUEST, "결제 처리에 실패했습니다."),
+    DUPLICATE_PAYMENT(HttpStatus.BAD_REQUEST, "중복된 결제 요청입니다."),
+    PAYMENT_SAVE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "결제 정보 저장에 실패했습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

@@ -17,10 +17,13 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @SuperBuilder
 public class Payment extends BaseEntity {
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;          // 결제한 회원
 
     @Column(nullable = false)
     private Integer amount;          // 실제 결제 금액
+
+    @Column(unique = true)
+    private String paymentKey;      // 결제 고유 키
 }

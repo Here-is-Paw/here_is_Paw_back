@@ -63,8 +63,8 @@ public class Member extends BaseEntity {
         return this.password.equals(password);
     }
 
-    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Payment payment;
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Payment> payments = new ArrayList<>();
 
     public Member(long id, String username, String nickname) {
         this.setId(id);
