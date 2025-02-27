@@ -77,6 +77,7 @@ public class MemberService {
                 .nickname(nickname)
                 .avatar(avatar)
                 .apiKey(UUID.randomUUID().toString())
+                .points(0)
                 .build();
 
         return memberRepository.save(member);
@@ -247,5 +248,21 @@ public class MemberService {
                 .key(dirName + "/" + fileName)
                 .build();
         s3Client.deleteObject(deleteObjectRequest);
+    }
+
+    // 결제금액 회원 포인트에 반영
+    @Transactional
+    public void updateMemberPoints(Member member, Integer amount) {
+        if (member == null) {
+            throw new CustomException(ErrorCode.NOT_FOUND_USER);
+        }
+
+        Member storedMember = memberRepository.findById(member.getId())
+                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+
+        storedMember.increasePoints(amount);
+        memberRepository.save(storedMember);
+        log.debug("회원 {} 포인트 {} 증가, 현재 포인트: {}",
+                storedMember.getUsername(), amount, storedMember.getPoints());
     }
 }

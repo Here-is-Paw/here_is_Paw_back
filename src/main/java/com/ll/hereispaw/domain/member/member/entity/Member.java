@@ -11,12 +11,10 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.annotations.ColumnDefault;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
@@ -77,8 +75,22 @@ public class Member extends BaseEntity {
         return this.password.equals(password);
     }
 
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Payment> payments = new ArrayList<>();
+    // 추후 삭제
+//    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<Payment> payments = new ArrayList<>();
+
+    // 포인트 기본값 0으로 설정
+    @Setter(AccessLevel.PRIVATE)
+    @Column(nullable = false)
+    @ColumnDefault("0")
+    private Integer points;
+
+    public void increasePoints(Integer amount) {
+        if (this.points == null) {
+            this.points = 0;
+        }
+        this.points += amount;
+    }
 
     public Member(long id, String username, String nickname) {
         this.setId(id);

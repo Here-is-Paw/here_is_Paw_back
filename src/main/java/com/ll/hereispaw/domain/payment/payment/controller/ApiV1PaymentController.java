@@ -133,17 +133,17 @@ public class ApiV1PaymentController {
 //    }
 
     // 포인트 조회
-    @GetMapping("/points")
-    public GlobalResponse<Integer> getPoints(@LoginUser Member loginUser) {
-        if (loginUser == null) {
-            return GlobalResponse.error(ErrorCode.ACCESS_DENIED);
-        }
-
-        try {
-            Integer points = paymentService.getPointsByMemberId(loginUser.getId());
-            return GlobalResponse.success(points);
-        } catch (Exception e) {
-            return GlobalResponse.error(ErrorCode.INTERNAL_SERVER_ERROR);
-        }
-    }
+//    @GetMapping("/points")
+//    public GlobalResponse<Integer> getPoints(@LoginUser Member loginUser) {
+//        if (loginUser == null) {
+//            return GlobalResponse.error(ErrorCode.ACCESS_DENIED);
+//        }
+//
+//        try {
+//            Integer points = paymentService.getPointsByMemberId(loginUser.getId());
+//            return GlobalResponse.success(points);
+//        } catch (Exception e) {
+//            return GlobalResponse.error(ErrorCode.INTERNAL_SERVER_ERROR);
+//        }
+//    }
 }

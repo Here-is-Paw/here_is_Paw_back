@@ -1,6 +1,7 @@
 package com.ll.hereispaw.domain.payment.payment.service;
 
 import com.ll.hereispaw.domain.member.member.entity.Member;
+import com.ll.hereispaw.domain.member.member.service.MemberService;
 import com.ll.hereispaw.domain.payment.payment.entity.Payment;
 import com.ll.hereispaw.domain.payment.payment.repository.PaymentRepository;
 import com.ll.hereispaw.global.error.ErrorCode;
@@ -18,6 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PaymentService {
     private final PaymentRepository paymentRepository;
+    private final MemberService memberService;
 
     // 결제 후 포인트를 DB에 저장
     @Transactional
@@ -45,6 +47,9 @@ public class PaymentService {
                     .amount(finalAmount)
                     .paymentKey(paymentKey)
                     .build();
+
+            // 회원 포인트 업데이트
+            memberService.updateMemberPoints(member, finalAmount);
 
             return paymentRepository.save(payment);
         } catch (Exception e) {
