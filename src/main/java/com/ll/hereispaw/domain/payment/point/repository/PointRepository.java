@@ -1,6 +1,6 @@
-package com.ll.hereispaw.domain.payment.payment.repository;
+package com.ll.hereispaw.domain.payment.point.repository;
 
-import com.ll.hereispaw.domain.payment.payment.entity.Point;
+import com.ll.hereispaw.domain.payment.point.entity.Point;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

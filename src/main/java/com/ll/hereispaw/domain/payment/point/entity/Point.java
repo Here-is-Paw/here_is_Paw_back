@@ -1,4 +1,4 @@
-package com.ll.hereispaw.domain.payment.payment.entity;
+package com.ll.hereispaw.domain.payment.point.entity;
 
 import com.ll.hereispaw.global.jpa.BaseEntity;
 import jakarta.persistence.Column;

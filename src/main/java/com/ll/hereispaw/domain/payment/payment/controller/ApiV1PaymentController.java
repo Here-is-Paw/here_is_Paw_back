@@ -1,8 +1,7 @@
 package com.ll.hereispaw.domain.payment.payment.controller;
 
-import com.ll.hereispaw.domain.member.member.entity.Member;
 import com.ll.hereispaw.domain.payment.payment.dto.PaymentRequest;
-import com.ll.hereispaw.domain.payment.payment.entity.Point;
+import com.ll.hereispaw.domain.payment.point.entity.Point;
 import com.ll.hereispaw.domain.payment.payment.service.PaymentService;
 import com.ll.hereispaw.global.error.ErrorCode;
 import com.ll.hereispaw.global.globalDto.GlobalResponse;

@@ -4,7 +4,7 @@ package com.ll.hereispaw.global.webMvc;
 import com.ll.hereispaw.domain.member.member.entity.Member;
 import com.ll.hereispaw.domain.member.member.service.MemberService;
 import com.ll.hereispaw.domain.missing.Auhtor.entity.Author;
-import com.ll.hereispaw.domain.payment.payment.entity.Point;
+import com.ll.hereispaw.domain.payment.point.entity.Point;
 import com.ll.hereispaw.global.security.SecurityUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -6,7 +6,7 @@ import com.ll.hereispaw.domain.member.member.dto.request.ModifyRequest;
 import com.ll.hereispaw.domain.member.member.dto.response.LoginResponse;
 import com.ll.hereispaw.domain.member.member.dto.response.MemberInfoDto;
 import com.ll.hereispaw.domain.member.member.entity.Member;
-import com.ll.hereispaw.domain.payment.payment.entity.Point;
+import com.ll.hereispaw.domain.payment.point.entity.Point;
 import com.ll.hereispaw.domain.member.member.repository.MemberRepository;
 import com.ll.hereispaw.global.error.ErrorCode;
 import com.ll.hereispaw.global.exception.CustomException;

@@ -1,8 +1,7 @@
 package com.ll.hereispaw.domain.payment.payment.service;
 
 import com.ll.hereispaw.domain.member.member.entity.Member;
-import com.ll.hereispaw.domain.missing.Auhtor.entity.Author;
-import com.ll.hereispaw.domain.payment.payment.entity.Point;
+import com.ll.hereispaw.domain.payment.point.entity.Point;
 import com.ll.hereispaw.domain.payment.payment.entity.Payment;
 import com.ll.hereispaw.domain.payment.payment.repository.PaymentRepository;
 import com.ll.hereispaw.global.error.ErrorCode;

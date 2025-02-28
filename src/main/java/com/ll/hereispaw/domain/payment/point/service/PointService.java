@@ -1,4 +1,4 @@
-package com.ll.hereispaw.domain.payment.payment.service;
+package com.ll.hereispaw.domain.payment.point.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.ll.hereispaw.domain.chat.chatMessage.entity.ChatMessage;
 import com.ll.hereispaw.domain.chat.chatRoom.entity.ChatRoom;
 import com.ll.hereispaw.domain.member.mypet.entity.MyPet;
-import com.ll.hereispaw.domain.payment.payment.entity.Payment;
 import com.ll.hereispaw.global.jpa.BaseEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -14,7 +13,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.annotations.ColumnDefault;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
