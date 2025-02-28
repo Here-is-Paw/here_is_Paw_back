@@ -1,5 +1,5 @@
 server:
-  port: 9000
+  port: 8079
 spring:
   hikari:
     connection-init-sql: "SET search_path TO public, topology, tiger;"
