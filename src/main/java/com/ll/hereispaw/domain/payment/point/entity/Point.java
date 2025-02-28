@@ -1,12 +1,16 @@
 package com.ll.hereispaw.domain.payment.point.entity;
 
+import com.ll.hereispaw.domain.payment.payment.entity.Payment;
 import com.ll.hereispaw.global.jpa.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.ColumnDefault;
+
+import java.util.List;
 
 @Entity
 @NoArgsConstructor
@@ -24,7 +28,10 @@ public class Point extends BaseEntity {
     @Setter(AccessLevel.PRIVATE)
     private Integer points;
 
-    public void increasePoints(Integer amount) {
+    public void addPoints(int amount) {
         this.points += amount;
     }
+
+    @OneToMany
+    private List<Payment> payments;
 }

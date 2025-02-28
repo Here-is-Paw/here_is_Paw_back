@@ -5,11 +5,13 @@ import com.ll.hereispaw.domain.payment.point.entity.Point;
 import com.ll.hereispaw.domain.payment.payment.entity.Payment;
 import com.ll.hereispaw.domain.payment.payment.repository.PaymentRepository;
 import com.ll.hereispaw.global.error.ErrorCode;
+import com.ll.hereispaw.global.event.PaymentConfirmedEvent;
 import com.ll.hereispaw.global.exception.CustomException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.json.simple.JSONObject;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,11 +21,13 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     @PersistenceContext
     private EntityManager entityManager;
+    private final ApplicationEventPublisher eventPublisher;
 
     // 결제 후 포인트를 DB에 저장
     @Transactional
     public synchronized Payment savePaymentData(JSONObject responseData, Point userPoint) {
         // 결제 상태 확인
+        // state: "DONE" - 결제 완료
         String status = (String) responseData.get("status");
         if (!"DONE".equals(status)) {
             throw new CustomException(ErrorCode.PAYMENT_FAILED);
@@ -42,14 +46,15 @@ public class PaymentService {
         // 새로운 결제 내역 생성 및 저장
         try {
             Payment payment = Payment.builder()
+                    .userPoint(userPoint)
                     .amount(finalAmount)
                     .paymentKey(paymentKey)
                     .build();
 
-            // 회원 포인트 업데이트
-            userPoint.increasePoints(finalAmount);
-            entityManager.merge(userPoint);
+            // 이벤트 발행
+            eventPublisher.publishEvent(new PaymentConfirmedEvent(this, payment));
 
+            System.out.println("PaymentService.savePaymentData: payment amount = " + payment.getAmount());
             return paymentRepository.save(payment);
         } catch (Exception e) {
             throw new CustomException(ErrorCode.PAYMENT_SAVE_FAILED);
