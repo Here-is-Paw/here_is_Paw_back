@@ -6,11 +6,14 @@ import com.ll.hereispaw.domain.member.member.dto.request.ModifyRequest;
 import com.ll.hereispaw.domain.member.member.dto.response.LoginResponse;
 import com.ll.hereispaw.domain.member.member.dto.response.MemberInfoDto;
 import com.ll.hereispaw.domain.member.member.entity.Member;
+import com.ll.hereispaw.domain.payment.payment.entity.Point;
 import com.ll.hereispaw.domain.member.member.repository.MemberRepository;
 import com.ll.hereispaw.global.error.ErrorCode;
 import com.ll.hereispaw.global.exception.CustomException;
 import com.ll.hereispaw.global.rq.Rq;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.PersistenceContext;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +54,9 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
     private final Rq rq;
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     private final String defaultAvatar = "https://paw-bucket-1.s3.ap-northeast-2.amazonaws.com/profile-img/defaultAvatar.jpg";
 
     public long count() {
@@ -77,7 +83,6 @@ public class MemberService {
                 .nickname(nickname)
                 .avatar(avatar)
                 .apiKey(UUID.randomUUID().toString())
-                .points(0)
                 .build();
 
         return memberRepository.save(member);
@@ -250,19 +255,7 @@ public class MemberService {
         s3Client.deleteObject(deleteObjectRequest);
     }
 
-    // 결제금액 회원 포인트에 반영
-    @Transactional
-    public void updateMemberPoints(Member member, Integer amount) {
-        if (member == null) {
-            throw new CustomException(ErrorCode.NOT_FOUND_USER);
-        }
-
-        Member storedMember = memberRepository.findById(member.getId())
-                .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
-
-        storedMember.increasePoints(amount);
-        memberRepository.save(storedMember);
-        log.debug("회원 {} 포인트 {} 증가, 현재 포인트: {}",
-                storedMember.getUsername(), amount, storedMember.getPoints());
+    public Point of(Member member) {
+        return entityManager.getReference(Point.class, member.getId());
     }
 }

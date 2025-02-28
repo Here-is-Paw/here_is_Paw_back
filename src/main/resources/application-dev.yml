@@ -5,10 +5,10 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: create
-    show-sql: true
+    show-sql: false # true
     properties:
       hibernate:
-        format_sql: true
+        format_sql: false # true
     open-in-view: false # OSIV 설정 끄기
 
 logging:

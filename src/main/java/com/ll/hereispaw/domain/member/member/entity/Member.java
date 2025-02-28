@@ -80,17 +80,17 @@ public class Member extends BaseEntity {
 //    private List<Payment> payments = new ArrayList<>();
 
     // 포인트 기본값 0으로 설정
-    @Setter(AccessLevel.PRIVATE)
-    @Column(nullable = false)
-    @ColumnDefault("0")
-    private Integer points;
-
-    public void increasePoints(Integer amount) {
-        if (this.points == null) {
-            this.points = 0;
-        }
-        this.points += amount;
-    }
+//    @Setter(AccessLevel.PRIVATE)
+//    @Column(nullable = false)
+//    @ColumnDefault("0")
+//    private Integer points;
+//
+//    public void increasePoints(Integer amount) {
+//        if (this.points == null) {
+//            this.points = 0;
+//        }
+//        this.points += amount;
+//    }
 
     public Member(long id, String username, String nickname) {
         this.setId(id);

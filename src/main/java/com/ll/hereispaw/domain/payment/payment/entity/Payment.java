@@ -17,10 +17,6 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @SuperBuilder
 public class Payment extends BaseEntity {
-    @ManyToOne
-    @JoinColumn(name = "member_id")
-    private Member member;          // 결제한 회원
-
     @Column(nullable = false)
     private Integer amount;          // 실제 결제 금액
 

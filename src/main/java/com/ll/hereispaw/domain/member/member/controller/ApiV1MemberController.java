@@ -6,6 +6,7 @@ import com.ll.hereispaw.domain.member.member.dto.request.ModifyRequest;
 import com.ll.hereispaw.domain.member.member.dto.response.LoginResponse;
 import com.ll.hereispaw.domain.member.member.dto.response.MemberInfoDto;
 import com.ll.hereispaw.domain.member.member.entity.Member;
+import com.ll.hereispaw.domain.payment.payment.entity.Point;
 import com.ll.hereispaw.domain.member.member.service.MemberService;
 import com.ll.hereispaw.global.error.ErrorCode;
 import com.ll.hereispaw.global.globalDto.GlobalResponse;
@@ -79,21 +80,5 @@ public class ApiV1MemberController {
         rq.deleteCookie("apiKey");
 
         return ResponseEntity.status(HttpStatus.OK).body("로그아웃 되었습니다.");
-    }
-
-    // 회원 포인트 조회m
-    @GetMapping("/points")
-    public GlobalResponse<Integer> getPoints(@LoginUser Member loginUser) {
-        if (loginUser == null) {
-            return GlobalResponse.error(ErrorCode.ACCESS_DENIED);
-        }
-
-        try {
-            // Member 엔티티에서 직접 points 필드 읽기
-            Integer points = loginUser.getPoints();
-            return GlobalResponse.success(points);
-        } catch (Exception e) {
-            return GlobalResponse.error(ErrorCode.INTERNAL_SERVER_ERROR);
-        }
     }
 }

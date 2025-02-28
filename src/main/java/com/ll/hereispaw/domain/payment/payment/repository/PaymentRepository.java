@@ -11,11 +11,6 @@ import java.util.Optional;
 
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
-    List<Payment> findAllByMemberId(Long memberId);
-
-    @Query("SELECT COALESCE(SUM(p.amount), 0) FROM Payment p WHERE p.member.id = :memberId")
-    Integer getTotalPointsByMemberId(@Param("memberId") Long memberId);
-
     @Query("SELECT COUNT(p) > 0 FROM Payment p WHERE p.paymentKey = :paymentKey")
     boolean existsByPaymentKey(@Param("paymentKey") String paymentKey);
 }

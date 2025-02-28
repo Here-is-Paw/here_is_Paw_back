@@ -4,6 +4,7 @@ package com.ll.hereispaw.global.webMvc;
 import com.ll.hereispaw.domain.member.member.entity.Member;
 import com.ll.hereispaw.domain.member.member.service.MemberService;
 import com.ll.hereispaw.domain.missing.Auhtor.entity.Author;
+import com.ll.hereispaw.domain.payment.payment.entity.Point;
 import com.ll.hereispaw.global.security.SecurityUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +12,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -25,11 +27,15 @@ public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver 
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.hasParameterAnnotation(LoginUser.class) &&
-                parameter.getParameterType().equals(Member.class) || parameter.getParameterType().equals(Author.class);
+        return parameter.hasParameterAnnotation(LoginUser.class) && (
+                parameter.getParameterType().equals(Member.class) ||
+                        parameter.getParameterType().equals(Author.class) ||
+                        parameter.getParameterType().equals(Point.class)
+        );
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Object resolveArgument(
             MethodParameter parameter, ModelAndViewContainer mavContainer,
             NativeWebRequest webRequest, WebDataBinderFactory binderFactory
@@ -52,6 +58,11 @@ public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver 
 
         if (parameter.getParameterType().equals(Author.class)) {
             return new Author(loginUser.getNickname());
+        }
+        else if (parameter.getParameterType().equals(Point.class)) {
+            Point userPoint = memberService.of(loginUser);
+            System.out.println("LoginUserArgumentResolver: points = " + userPoint.getPoints());
+            return userPoint;
         }
 
         return loginUser;

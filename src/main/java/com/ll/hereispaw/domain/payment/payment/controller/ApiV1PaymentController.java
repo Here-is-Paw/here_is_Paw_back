@@ -2,6 +2,7 @@ package com.ll.hereispaw.domain.payment.payment.controller;
 
 import com.ll.hereispaw.domain.member.member.entity.Member;
 import com.ll.hereispaw.domain.payment.payment.dto.PaymentRequest;
+import com.ll.hereispaw.domain.payment.payment.entity.Point;
 import com.ll.hereispaw.domain.payment.payment.service.PaymentService;
 import com.ll.hereispaw.global.error.ErrorCode;
 import com.ll.hereispaw.global.globalDto.GlobalResponse;
@@ -12,9 +13,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.InputStream;
@@ -22,12 +20,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.net.HttpURLConnection;
-import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
 
 // TODO: response 객체 관련 수정해야 함. GlobalResponse
 @Slf4j
@@ -41,7 +36,7 @@ public class ApiV1PaymentController {
 
     // 결제 승인
     @PostMapping("/confirm")
-    public GlobalResponse<Object> confirmPayment(@LoginUser Member loginUser, @RequestBody PaymentRequest request) throws Exception {
+    public GlobalResponse<Object> confirmPayment(@LoginUser Point loginUser, @RequestBody PaymentRequest request) throws Exception {
         if (loginUser == null) {
             return GlobalResponse.error(ErrorCode.ACCESS_DENIED);
         }
@@ -97,53 +92,39 @@ public class ApiV1PaymentController {
                  Reader reader = new InputStreamReader(responseStream, StandardCharsets.UTF_8)) {
                 JSONObject jsonObject = (JSONObject) parser.parse(reader);
 
+                // 결제 실패
                 if (code != 200) {
                     logger.error("Payment failed: {}", jsonObject);
                     return GlobalResponse.error(ErrorCode.PAYMENT_FAILED, jsonObject);
                 }
 
                 paymentService.savePaymentData(jsonObject, loginUser);
+                System.out.println("ApiV1PaymentController points : " + loginUser.getPoints());
 
+                // 결제 성공
                 logger.info("Payment successful: {}", jsonObject);
                 return GlobalResponse.success(jsonObject);
             }
         } catch (Exception e) {
+            // 결제 오류
             logger.error("Payment processing error", e);
             return GlobalResponse.error(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
 
-    // 결제 요청
-//    @GetMapping("/pay")
-//    public ResponseEntity<?> pay(@LoginUser Member loginUser) {
-//        if (loginUser == null) {
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 하지 않은 사용자입니다.");
-//        }
-//
-//        try {
-//            // 프론트엔드 체크아웃 페이지로 리다이렉트
-//            Map<String, String> response = new HashMap<>();
-//            response.put("checkoutUrl", "http://localhost:5173/checkout");
-//
-//            return ResponseEntity.ok(response);
-//        } catch (Exception e) {
-//            return ResponseEntity.internalServerError()
-//                    .body("결제 페이지 이동 중 오류가 발생했습니다.");
-//        }
-//    }
+    // 회원 포인트 조회
+    @GetMapping("/points")
+    public GlobalResponse<Integer> getPoints(@LoginUser Point loginUser) {
+        if (loginUser == null) {
+            return GlobalResponse.error(ErrorCode.ACCESS_DENIED);
+        }
 
-    // 포인트 조회
-//    @GetMapping("/points")
-//    public GlobalResponse<Integer> getPoints(@LoginUser Member loginUser) {
-//        if (loginUser == null) {
-//            return GlobalResponse.error(ErrorCode.ACCESS_DENIED);
-//        }
-//
-//        try {
-//            Integer points = paymentService.getPointsByMemberId(loginUser.getId());
-//            return GlobalResponse.success(points);
-//        } catch (Exception e) {
-//            return GlobalResponse.error(ErrorCode.INTERNAL_SERVER_ERROR);
-//        }
-//    }
+        try {
+            Integer points = loginUser.getPoints();
+            System.out.println("ApiV1MemberController.getPoints points : " + points);
+            return GlobalResponse.success(points);
+        } catch (Exception e) {
+            return GlobalResponse.error(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
