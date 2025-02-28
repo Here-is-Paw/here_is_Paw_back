@@ -14,4 +14,5 @@ public class DogFaceRequestDto {
   private String image;
   private String postType;
   private Long postId;
+  private Long postMemberId;
 }

@@ -68,6 +68,15 @@ public class FindService {
 
         FindPost savedPost = findRepository.save(findPost);
 
+        //카프카 메시지 발행
+        DogFaceRequestDto dogFaceRequestDto = DogFaceRequestDto.builder()
+            .type("save")
+            .image("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQZAHxgFBNiIPBx5mXMtIoMN7udx45JgJOoq0aZqnhHhxcQEKsjcjMivntAgRt_tUIP8ZsY5wOuNyXscwNWrBoHYGZfhFzhCPAO2lq87Ag")
+            .postType(POST_TYPE)
+            .postId(savedPost.getId())
+            .postMemberId(savedPost.getMember_id())
+            .build();
+        kafkaTemplate.send("dog-face-request", dogFaceRequestDto);
         return savedPost.getId(); // 저장된 find_post_id 반환
     }
 
@@ -79,14 +88,15 @@ public class FindService {
 
         Photo savedPhoto = findPhotoRepository.save(photo);
 
-        //카프카 메시지 발행
-        DogFaceRequestDto dogFaceRequestDto = DogFaceRequestDto.builder()
-                .type("save")
-                .image(path_url)
-                .postType(POST_TYPE)
-                .postId(findPostId)
-                .build();
-        kafkaTemplate.send("dog-face-request", dogFaceRequestDto);
+//        //카프카 메시지 발행
+//        DogFaceRequestDto dogFaceRequestDto = DogFaceRequestDto.builder()
+//                .type("save")
+//                .image(path_url)
+//                .postType(POST_TYPE)
+//                .postId(findPostId)
+//                .postMemberId(savedPost.getMember_id())
+//                .build();
+//        kafkaTemplate.send("dog-face-request", dogFaceRequestDto);
 
         return savedPhoto.getPath_url(); // 저장된 photo ID 반환
     }
