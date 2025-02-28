@@ -10,7 +10,7 @@ spring:
               - profile_nickname
               - profile_image
               - account_email
-            redirect-uri: "${custom.site.backUrl}/login/oauth2/code/kakao"
+            redirect-uri: "${custom.site.backUrl}/{action}/oauth2/code/{registrationId}"
             authorization-grant-type: authorization_code
             client-name: Kakao    # 클라이언트 이름
         provider:
