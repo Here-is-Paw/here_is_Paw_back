@@ -120,7 +120,6 @@ public class ApiV1PaymentController {
 
         try {
             Integer points = loginUser.getPoints();
-            System.out.println("ApiV1MemberController.getPoints points : " + points);
             return GlobalResponse.success(points);
         } catch (Exception e) {
             return GlobalResponse.error(ErrorCode.INTERNAL_SERVER_ERROR);

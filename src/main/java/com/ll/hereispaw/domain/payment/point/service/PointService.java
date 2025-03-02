@@ -26,7 +26,7 @@ public class PointService {
         Point userPoint = pointRepository.findByUsername(username);
 
         log.info("before point: " + userPoint.getPoints());
-        userPoint.setPoints(points);
+        userPoint.setPoints(userPoint.getPoints() + points);
         log.info("after point: " + userPoint.getPoints());
 
         pointRepository.save(userPoint);
