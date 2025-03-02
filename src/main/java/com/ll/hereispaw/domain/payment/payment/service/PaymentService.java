@@ -6,7 +6,6 @@ import com.ll.hereispaw.domain.payment.payment.entity.Payment;
 import com.ll.hereispaw.domain.payment.payment.repository.PaymentRepository;
 import com.ll.hereispaw.domain.payment.point.kafka.dto.PointDto;
 import com.ll.hereispaw.global.error.ErrorCode;
-import com.ll.hereispaw.global.event.PaymentConfirmedEvent;
 import com.ll.hereispaw.global.exception.CustomException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -23,10 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class PaymentService {
     private final PaymentRepository paymentRepository;
-//    @PersistenceContext
-//    private EntityManager entityManager;
-//    private final ApplicationEventPublisher eventPublisher;
-
     private final KafkaTemplate<String, PointDto> kafkaTemplate;
 
     // 결제 후 포인트를 DB에 저장
@@ -61,7 +56,6 @@ public class PaymentService {
                     .build();
 
             // 이벤트 발행
-//            eventPublisher.publishEvent(new PaymentConfirmedEvent(this, payment));
             kafkaTemplate.send("payment-confirmed", PointDto.builder()
                     .username(userPoint.getUsername())
                     .points(finalAmount)
@@ -83,8 +77,4 @@ public class PaymentService {
         }
         return paymentRepository.existsByPaymentKey(paymentKey);
     }
-
-//    public Point of(Member member) {
-//        return entityManager.getReference(Point.class, member.getId());
-//    }
 }

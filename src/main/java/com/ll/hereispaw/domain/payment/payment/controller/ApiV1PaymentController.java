@@ -23,7 +23,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-// TODO: response 객체 관련 수정해야 함. GlobalResponse
 @Slf4j
 @RestController
 @RequiredArgsConstructor
