@@ -25,12 +25,7 @@ public class Point extends BaseEntity {
 
     // 포인트 기본값 0으로 설정
     @Column(columnDefinition = "INT default 0", nullable = false)
-    @Setter(AccessLevel.PRIVATE)
     private Integer points;
-
-    public void addPoints(int amount) {
-        this.points += amount;
-    }
 
     @OneToMany
     private List<Payment> payments;

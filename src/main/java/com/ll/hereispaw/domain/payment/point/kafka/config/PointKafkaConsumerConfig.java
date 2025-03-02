@@ -19,34 +19,26 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 public class PointKafkaConsumerConfig {
 
     @Value("${spring.kafka.bootstrap-servers}")
-    private String bootstrapServers; // 카프카 브로커 주소
+    private String bootstrapServers;
 
-    @Bean(name = "pointConsumerFactory")
-    public ConsumerFactory<String, PointDto> consumerFactory() {
+    @Bean
+    public Map<String, Object> consumerConfigs() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, "point");
+        return props;
+    }
 
-        // JsonDeserializer 설정
-        JsonDeserializer<PointDto> jsonDeserializer = new JsonDeserializer<>(
-                PointDto.class);
-        jsonDeserializer.addTrustedPackages("com.ll.hereispaw.domain.point.kafka");
-
-        // TypeMapping 이슈를 피하기 위한 설정
-        jsonDeserializer.setUseTypeHeaders(false);
-
-        return new DefaultKafkaConsumerFactory<>(
-                props,
-                new StringDeserializer(),
-                jsonDeserializer
-        );
+    @Bean(name = "pointConsumerFactory")
+    public ConsumerFactory<String, String> consumerFactory() {
+        return new DefaultKafkaConsumerFactory<>(consumerConfigs());
     }
 
     @Bean(name = "pointKafkaListenerContainerFactory")
-    public ConcurrentKafkaListenerContainerFactory<String, PointDto> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, PointDto> factory =
+    public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, String> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
         return factory;

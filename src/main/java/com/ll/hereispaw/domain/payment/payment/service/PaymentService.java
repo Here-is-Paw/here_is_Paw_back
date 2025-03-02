@@ -4,6 +4,7 @@ import com.ll.hereispaw.domain.member.member.entity.Member;
 import com.ll.hereispaw.domain.payment.point.entity.Point;
 import com.ll.hereispaw.domain.payment.payment.entity.Payment;
 import com.ll.hereispaw.domain.payment.payment.repository.PaymentRepository;
+import com.ll.hereispaw.domain.payment.point.kafka.dto.PointDto;
 import com.ll.hereispaw.global.error.ErrorCode;
 import com.ll.hereispaw.global.event.PaymentConfirmedEvent;
 import com.ll.hereispaw.global.exception.CustomException;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONObject;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,9 +23,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 public class PaymentService {
     private final PaymentRepository paymentRepository;
-    @PersistenceContext
-    private EntityManager entityManager;
-    private final ApplicationEventPublisher eventPublisher;
+//    @PersistenceContext
+//    private EntityManager entityManager;
+//    private final ApplicationEventPublisher eventPublisher;
+
+    private final KafkaTemplate<String, PointDto> kafkaTemplate;
 
     // 결제 후 포인트를 DB에 저장
     @Transactional
@@ -57,7 +61,12 @@ public class PaymentService {
                     .build();
 
             // 이벤트 발행
-            eventPublisher.publishEvent(new PaymentConfirmedEvent(this, payment));
+//            eventPublisher.publishEvent(new PaymentConfirmedEvent(this, payment));
+            kafkaTemplate.send("payment-confirmed", PointDto.builder()
+                    .username(userPoint.getUsername())
+                    .points(finalAmount)
+                    .build());
+
             log.info("Payment saved: paymentKey = {}, amount = {}", paymentKey, finalAmount);
 
             return paymentRepository.save(payment);
@@ -75,7 +84,7 @@ public class PaymentService {
         return paymentRepository.existsByPaymentKey(paymentKey);
     }
 
-    public Point of(Member member) {
-        return entityManager.getReference(Point.class, member.getId());
-    }
+//    public Point of(Member member) {
+//        return entityManager.getReference(Point.class, member.getId());
+//    }
 }

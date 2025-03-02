@@ -3,6 +3,7 @@ package com.ll.hereispaw.domain.payment.point.service;
 import com.ll.hereispaw.domain.member.member.entity.Member;
 import com.ll.hereispaw.domain.payment.payment.entity.Payment;
 import com.ll.hereispaw.domain.payment.point.entity.Point;
+import com.ll.hereispaw.domain.payment.point.kafka.dto.PointDto;
 import com.ll.hereispaw.domain.payment.point.repository.PointRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,12 +19,14 @@ import java.util.Optional;
 public class PointService {
     private final PointRepository pointRepository;
 
-    public void updatePoint(Payment payment) {
-        Point userPoint = payment.getUserPoint();
-        int pointAmount = payment.getAmount();
+    public void updatePoint(PointDto pointDto) {
+        String username = pointDto.getUsername();
+        Integer points = pointDto.getPoints();
+
+        Point userPoint = pointRepository.findByUsername(username);
 
         log.info("before point: " + userPoint.getPoints());
-        userPoint.addPoints(pointAmount);
+        userPoint.setPoints(points);
         log.info("after point: " + userPoint.getPoints());
 
         pointRepository.save(userPoint);
