@@ -1,9 +1,9 @@
 package com.ll.hereispaw.global.config;
 
-import com.ll.hereispaw.global.security.CustomAuthenticationFilter;
 import com.ll.hereispaw.global.security.CustomAuthorizationRequestResolver;
 import com.ll.hereispaw.global.security.CustomOAuth2AuthenticationSuccessHandler;
 import com.ll.hereispaw.global.security.CustomOAuth2UserService;
+import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -13,20 +13,17 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import java.util.Arrays;
 
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
-    private final CustomAuthenticationFilter customAuthenticationFilter;
-    private final CustomOAuth2AuthenticationSuccessHandler customOAuth2AuthenticationSuccessHandler;
-    private final CustomAuthorizationRequestResolver customAuthorizationRequestResolver;
+  // CustomAuthenticationFilter 제거
+  private final CustomOAuth2AuthenticationSuccessHandler customOAuth2AuthenticationSuccessHandler;
+  private final CustomAuthorizationRequestResolver customAuthorizationRequestResolver;
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -41,50 +38,47 @@ public class SecurityConfig {
         return source;
     }
 
-    @Bean
-    public SecurityFilterChain baseSecurityFilterChain(HttpSecurity http, CustomOAuth2UserService customOAuth2UserService) throws Exception {
 
-        http
-//                .securityMatcher("")
-                .authorizeHttpRequests(authorizeRequests ->
-                        authorizeRequests
-                                .requestMatchers("/h2-console/**").permitAll()
-                                .requestMatchers("/swagger-ui/index.html").permitAll()
-                                .requestMatchers("/h2-console/**").permitAll()
-                                //.requestMatchers("/api/v1/chat/**").permitAll()
-                                .requestMatchers("/api/v1/members/me").permitAll()
-                                .requestMatchers("/api/v1/members/signup").permitAll()
-                                .requestMatchers("/api/v1/members/login").permitAll()
-                                .requestMatchers("/api/v1/members/logout").permitAll()
-                                .requestMatchers("/api/*/**")
-                                .authenticated()
-                                .anyRequest()
-                                .permitAll()
+  @Bean
+  public SecurityFilterChain baseSecurityFilterChain(HttpSecurity http, CustomOAuth2UserService customOAuth2UserService) throws Exception {
+    http
+        .authorizeHttpRequests(authorizeRequests ->
+            authorizeRequests
+                // 공개 API 설정 유지
+                .requestMatchers("/h2-console/**").permitAll()
+                .requestMatchers("/swagger-ui/index.html").permitAll()
+                .requestMatchers("/api/v1/members/me").permitAll()
+                .requestMatchers("/api/v1/members/signup").permitAll()
+                .requestMatchers("/api/v1/members/login").permitAll()
+                .requestMatchers("/api/v1/members/logout").permitAll()
+                // 나머지 API는 모두 허용 (API 게이트웨이에서 이미 인증됨)
+                .anyRequest().permitAll()
+        )
+        .headers(
+            headers ->
+                headers.frameOptions(
+                    HeadersConfigurer.FrameOptionsConfig::sameOrigin
                 )
-                .headers(
-                        headers ->
-                                headers.frameOptions(
-                                        HeadersConfigurer.FrameOptionsConfig::sameOrigin
-                                )
+        )
+        .csrf(AbstractHttpConfigurer::disable)
+        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+        .formLogin(
+            AbstractHttpConfigurer::disable
+        )
+        .sessionManagement((sessionManagement) -> sessionManagement
+            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        )
+        .oauth2Login(
+            oauth2Login -> oauth2Login
+                .successHandler(customOAuth2AuthenticationSuccessHandler)
+                .authorizationEndpoint(
+                    authorizationEndpoint -> authorizationEndpoint
+                        .authorizationRequestResolver(customAuthorizationRequestResolver)
                 )
-                .csrf(AbstractHttpConfigurer::disable)
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .formLogin(
-                        AbstractHttpConfigurer::disable
-                )
-                .sessionManagement((sessionManagement) -> sessionManagement
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
-                .oauth2Login(
-                        oauth2Login -> oauth2Login
-                                .successHandler(customOAuth2AuthenticationSuccessHandler)
-                                .authorizationEndpoint(
-                                        authorizationEndpoint -> authorizationEndpoint
-                                                .authorizationRequestResolver(customAuthorizationRequestResolver)
-                                )
-                )
-                .addFilterBefore(customAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        )
+    // CustomAuthenticationFilter 제거
+    ;
 
-        return http.build();
-    }
+    return http.build();
+  }
 }
