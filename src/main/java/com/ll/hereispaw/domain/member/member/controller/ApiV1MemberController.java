@@ -25,6 +25,15 @@ public class ApiV1MemberController {
     private final MemberService memberService;
     private final Rq rq;
 
+    @GetMapping("/{memberId}")
+    public MemberInfoDto getMember(@PathVariable Long memberId) {
+        log.debug("memberId : {}", memberId);
+        Member member = memberService.findById(memberId).get();
+        MemberInfoDto memberInfoDto = new MemberInfoDto(member);
+        log.debug("member : {}", member);
+        return memberInfoDto;
+    }
+
     // 유저 기본 정보 가져오기
     @GetMapping("/me")
     public ResponseEntity<?> me(@LoginUser Member loginUser) {
@@ -78,4 +87,6 @@ public class ApiV1MemberController {
 
         return ResponseEntity.status(HttpStatus.OK).body("로그아웃 되었습니다.");
     }
+
+
 }
