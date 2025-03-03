@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.geo.Point;
 
 import java.time.LocalDateTime;
 
@@ -22,13 +23,16 @@ public class FindPost {
     @EqualsAndHashCode.Include
     private Long id;
 
+    private String title; // 글 제목
+    private String situation; // 발견 상황
     private String breed; // 견종
-    private String geo; // 좌표인데 타입 확인 필요
     private String location; // 지역
     private String name; // 이름
     private String color; // 색상
     private String gender; // 성별
     private String etc; // 기타 특징
+
+    private Point geo; // 좌표인데 타입 확인 필요
 
     private int age; // 나이
     private int state; // 상태

@@ -10,11 +10,16 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
         format_sql: true
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 50MB   # 개별 파일 최대 크기
+      max-request-size: 100MB
   security:
     oauth2:
       client:
@@ -33,6 +38,15 @@ spring:
             token-uri: https://kauth.kakao.com/oauth/token
             user-info-uri: https://kapi.kakao.com/v2/user/me    # 사용자 정보 조회 URI
             user-name-attribute: id    # 사용자 정보에서 사용자 이름에 해당하는 속성
+  kafka:
+    bootstrap-servers: localhost:19092
+    producer:
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: com.ll.hereispaw.domain.noti.dto.kafka
+        spring.json.use.type.headers: false
 springdoc:
   swagger-ui:
     path: /swagger-ui.html  # Swagger UI 경로

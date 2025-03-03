@@ -160,7 +160,7 @@ public class MyPetService {
         myPetRepository.delete(myPet);
     }
 
-    private String uploadImageToS3(MultipartFile file) throws IOException {
+    private String uploadImageToS3(MultipartFile file) throws IOException, NullPointerException {
         if (file == null || file.isEmpty()) {
             return null;
         }

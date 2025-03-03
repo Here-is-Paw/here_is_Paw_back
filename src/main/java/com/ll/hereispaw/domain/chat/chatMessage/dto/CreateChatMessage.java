@@ -4,5 +4,8 @@ import lombok.Data;
 
 @Data
 public class CreateChatMessage {
+    private Long chatMessageId;
     private String content;
+    private Long memberId;
+    private String memberNickname;
 }

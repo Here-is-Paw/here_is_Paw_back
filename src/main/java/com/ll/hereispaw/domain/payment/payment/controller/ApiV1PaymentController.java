@@ -1,7 +1,10 @@
 package com.ll.hereispaw.domain.payment.payment.controller;
 
 import com.ll.hereispaw.domain.member.member.entity.Member;
+import com.ll.hereispaw.domain.payment.payment.dto.PaymentRequest;
 import com.ll.hereispaw.domain.payment.payment.service.PaymentService;
+import com.ll.hereispaw.global.error.ErrorCode;
+import com.ll.hereispaw.global.globalDto.GlobalResponse;
 import com.ll.hereispaw.global.webMvc.LoginUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,8 +30,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 // TODO: response 객체 관련 수정해야 함. GlobalResponse
-// TODO: 회원 객체 받아서 DB에 함께 저장 -> 결과 확인할 것
-// TODO: 결제 후 결제 금액이 잘 추가되는지 확인
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -38,36 +39,12 @@ public class ApiV1PaymentController {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final JSONParser parser = new JSONParser();
 
-    // 결제 승인 시 필요한 데이터
-    static class PaymentRequest {
-        private String orderId;
-        private Integer amount;
-        private String paymentKey;
-
-        public String getOrderId() { return orderId; }
-        public void setOrderId(String orderId) { this.orderId = orderId; }
-        public Integer getAmount() { return amount; }
-        public void setAmount(Integer amount) { this.amount = amount; }
-        public String getPaymentKey() { return paymentKey; }
-        public void setPaymentKey(String paymentKey) { this.paymentKey = paymentKey; }
-    }
-
     // 결제 승인
     @PostMapping("/confirm")
-    public ResponseEntity<JSONObject> confirmPayment(@LoginUser Member loginUser, @RequestBody PaymentRequest request) throws Exception {
+    public GlobalResponse<Object> confirmPayment(@LoginUser Member loginUser, @RequestBody PaymentRequest request) throws Exception {
         if (loginUser == null) {
-            JSONObject errorResponse = new JSONObject();
-            errorResponse.put("code", "UNAUTHORIZED");
-            errorResponse.put("message", "로그인이 필요한 서비스입니다.");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+            return GlobalResponse.error(ErrorCode.ACCESS_DENIED);
         }
-
-//        if (!paymentService.validatePaymentState(request.getState())) {
-//            JSONObject errorResponse = new JSONObject();
-//            errorResponse.put("code", "INVALID_STATE");
-//            errorResponse.put("message", "Invalid state parameter");
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-//        }
 
         try {
             // request 로깅
@@ -75,7 +52,7 @@ public class ApiV1PaymentController {
 
             // 필수 파라미터(Id, Amount, PaymentKey)가 누락되었는지 확인
             if (request.getOrderId() == null || request.getAmount() == null || request.getPaymentKey() == null) {
-                throw new RuntimeException("Required parameters are missing");
+                return GlobalResponse.error(ErrorCode.MISSING_INPUT_VALUE);
             }
 
             // 결제 승인 API 요청을 위한 JSON 객체 생성
@@ -122,55 +99,51 @@ public class ApiV1PaymentController {
 
                 if (code != 200) {
                     logger.error("Payment failed: {}", jsonObject);
-                    return ResponseEntity.status(code).body(jsonObject);
+                    return GlobalResponse.error(ErrorCode.PAYMENT_FAILED, jsonObject);
                 }
 
                 paymentService.savePaymentData(jsonObject, loginUser);
 
                 logger.info("Payment successful: {}", jsonObject);
-                return ResponseEntity.ok(jsonObject);
+                return GlobalResponse.success(jsonObject);
             }
         } catch (Exception e) {
             logger.error("Payment processing error", e);
-            JSONObject errorResponse = new JSONObject();
-            errorResponse.put("code", "INTERNAL_ERROR");
-            errorResponse.put("message", "결제 처리 중 오류가 발생했습니다");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            return GlobalResponse.error(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
 
     // 결제 요청
-    @GetMapping("/pay")
-    public ResponseEntity<?> pay(@LoginUser Member loginUser) {
-        if (loginUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 하지 않은 사용자입니다.");
-        }
-
-        try {
-            // 프론트엔드 체크아웃 페이지로 리다이렉트
-            Map<String, String> response = new HashMap<>();
-            response.put("checkoutUrl", "http://localhost:5173/checkout");
-
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError()
-                    .body("결제 페이지 이동 중 오류가 발생했습니다.");        }
-    }
+//    @GetMapping("/pay")
+//    public ResponseEntity<?> pay(@LoginUser Member loginUser) {
+//        if (loginUser == null) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 하지 않은 사용자입니다.");
+//        }
+//
+//        try {
+//            // 프론트엔드 체크아웃 페이지로 리다이렉트
+//            Map<String, String> response = new HashMap<>();
+//            response.put("checkoutUrl", "http://localhost:5173/checkout");
+//
+//            return ResponseEntity.ok(response);
+//        } catch (Exception e) {
+//            return ResponseEntity.internalServerError()
+//                    .body("결제 페이지 이동 중 오류가 발생했습니다.");
+//        }
+//    }
 
     // 포인트 조회
     @GetMapping("/points")
-    public ResponseEntity<?> getPoints(@LoginUser Member loginUser) {
+    public GlobalResponse<Integer> getPoints(@LoginUser Member loginUser) {
         if (loginUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("로그인이 필요한 서비스입니다.");
+            return GlobalResponse.error(ErrorCode.ACCESS_DENIED);
         }
 
         try {
             Integer points = paymentService.getPointsByMemberId(loginUser.getId());
-            return ResponseEntity.ok().body(points);
+            return GlobalResponse.success(points);
         } catch (Exception e) {
-            return ResponseEntity.internalServerError()
-                    .body("포인트 조회 중 오류가 발생했습니다.");
+            return GlobalResponse.error(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
 }

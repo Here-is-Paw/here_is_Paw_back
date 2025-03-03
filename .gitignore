@@ -57,3 +57,5 @@ out/
 /out/**
 
 ../.idea
+
+docker-compose.yml.server
