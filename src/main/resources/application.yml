@@ -55,5 +55,5 @@ springdoc:
 logging:
   level:
     root: info
-    com.ll.hereispaw : debug, warn
+
 
