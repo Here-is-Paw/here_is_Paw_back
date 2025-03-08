@@ -57,7 +57,8 @@ public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver 
         Member loginUser = memberService.findByUsername(username).get();
 
         if (parameter.getParameterType().equals(Author.class)) {
-            return new Author(loginUser.getNickname());
+
+            return new Author(loginUser.getId(), loginUser.getNickname());
         }
         else if (parameter.getParameterType().equals(Point.class)) {
             Point userPoint = memberService.of(loginUser);

@@ -64,7 +64,7 @@ public class MemberService {
     }
 
     public MemberInfoDto me(Member loginUser) {
-        log.debug("loginUser : {}", loginUser.getUsername());
+        log.debug("loginUser : {}", loginUser.getId());
 
         return new MemberInfoDto(loginUser);
     }
@@ -150,8 +150,8 @@ public class MemberService {
     }
 
     @Transactional
-    public void modify(Member loginUser, ModifyRequest modifyRequest) {
-        Member member = memberRepository.findByUsername(modifyRequest.username()).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+    public MemberInfoDto modify(Member loginUser, ModifyRequest modifyRequest) {
+        Member member = memberRepository.findById(modifyRequest.id()).orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
 
         if (!loginUser.getUsername().equals(member.getUsername())) {
             throw new CustomException(ErrorCode.SC_FORBIDDEN);
@@ -166,14 +166,17 @@ public class MemberService {
 
 
             // S3 삭제
-            if (avatar != null && !avatar.equals(defaultAvatar)) deleteImageToS3(member.getAvatar());
+            if (avatar != null && !avatar.equals(defaultAvatar)) {
+                deleteImageToS3(member.getAvatar());
+            }
 
-            String fileName = uploadImageToS3(modifyRequest.profile());
-            log.debug("파일 네임 {}", fileName);
+            String fileName = uploadImageToS3(modifyRequest.profileImage());
             member.setAvatar(fileName);
         }
 
         memberRepository.save(member);
+
+        return new MemberInfoDto(member);
     }
 
     @Transactional
@@ -201,7 +204,7 @@ public class MemberService {
     }
 
     @Transactional
-    public void radius_update(Member loginUser, Integer radius) {
+    public void radius_update(Member loginUser, Double radius) {
         Member user = memberRepository.findById(loginUser.getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
 
@@ -247,7 +250,6 @@ public class MemberService {
     }
 
     private void deleteImageToS3(String fileName) {
-        log.debug("동작함");
         DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
                 .bucket(bucketName)
                 .key(dirName + "/" + fileName)

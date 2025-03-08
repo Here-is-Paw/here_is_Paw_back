@@ -5,10 +5,6 @@ import com.ll.hereispaw.domain.chat.chatMessage.entity.ChatMessage;
 import com.ll.hereispaw.domain.chat.chatRoom.entity.ChatRoom;
 import com.ll.hereispaw.domain.member.mypet.entity.MyPet;
 import com.ll.hereispaw.global.jpa.BaseEntity;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -59,7 +55,7 @@ public class Member extends BaseEntity {
 
     private String avatar;
 
-    private int radius = 500;
+    private Double radius;
 
     public boolean isAdmin() {
         return "admin".startsWith(username);
